@@ -1,7 +1,7 @@
 {
     "明月扩展": {
         "同步授权信息(三分钟同步一次)": {
-            "Url": "http://localhost:11345/wncs",
+            "Url": "http://127.0.0.1:11345/wncs",
             "Post": "{wncs}",
             "Time": "180",
             "Today": 3,
