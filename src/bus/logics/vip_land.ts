@@ -398,7 +398,7 @@ export class VipLandLogic extends Logic<Config> {
                 this.logger.log(
                     '[%s]不足, 使用[%d]个V币为[VIP土地 %d]购买[%d]个',
                     tname,
-                    tprice,
+                    tprice * buyAmount,
                     land.index,
                     buyAmount,
                 );
