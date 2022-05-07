@@ -23,6 +23,10 @@ export class Server {
     }
 
     public start() {
+        this.logger.log(
+            '本插件代码开源免费, 感谢支持! 开源地址: %s',
+            'https://github.com/chen-gaoyuan/HappyFarmExtension',
+        );
         this.readConfigFile();
         try {
             this.httpServer.listen(parseInt(this.env.PORT || '8080'), this.env.HOST || 'localhost');
