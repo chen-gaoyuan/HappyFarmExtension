@@ -170,7 +170,7 @@ export class Server {
                 ...params,
                 ...headers,
             });
-            this.logger.log(`[${params['uinY']}] 同步授权数据成功!`);
+            this.logger.debug(`[${params['uinY']}] 同步授权数据成功!`);
         } else {
             const newRobot = new Robot(params['uinY'], params['uIdx']);
             this.robots.set(params['uinY'], newRobot);
@@ -178,7 +178,7 @@ export class Server {
                 ...params,
                 ...headers,
             });
-            this.logger.log(`[${params['uinY']}] 同步授权数据成功!`);
+            this.logger.log(`[${params['uinY']}] 首次同步授权数据成功!`);
 
             newRobot.reloadConfig(this.env, config);
         }
