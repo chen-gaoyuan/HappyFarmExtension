@@ -215,7 +215,7 @@ export class VipLandLogic extends Logic<Config> {
                     if (data.ret == -12) {
                         this.canShow = false;
                         this.logger.warn(data.direction);
-                        return this.delay(15, this.analyzeExecute);
+                        return this.delay(1, this.analyzeExecute);
                     }
                     if (data.ecode !== 0) {
                         return this.delay(15, this.getVipLandInfo);
