@@ -212,13 +212,13 @@ export class VipLandLogic extends Logic<Config> {
                 data: { act: 'show', id: minId, gid: minIndex },
                 cd: 1,
                 callback: (data) => {
-                    if (data.ecode !== 0) {
-                        return this.delay(15, this.getVipLandInfo);
-                    }
                     if (data.ret == -12) {
                         this.canShow = false;
                         this.logger.warn(data.direction);
                         return this.delay(15, this.analyzeExecute);
+                    }
+                    if (data.ecode !== 0) {
+                        return this.delay(15, this.getVipLandInfo);
                     }
                     for (const garden of this.garden) {
                         if (garden.index === minIndex) {
