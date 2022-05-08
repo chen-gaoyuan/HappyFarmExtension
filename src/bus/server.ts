@@ -24,6 +24,7 @@ export class Server {
 
     public start() {
         this.logger.log('本插件代永久免费, 感谢支持!');
+        this.logger.log('插件使用交流群: 293470342');
         // this.logger.log('开源地址: %s', 'https://github.com/chen-gaoyuan/HappyFarmExtension');
         this.readConfigFile();
         try {
