@@ -108,7 +108,7 @@ export class VipLandLogic extends Logic<Config> {
         const nowTime = Math.floor(Date.now() / 1000);
         // 按土地顺序处理
         for (const land of this.land) {
-            // todo: 熟了就收获
+            // 熟了就收获
             if (land.harvest_t && land.harvest_t < nowTime) {
                 this.harvestSeed(land);
                 return;
@@ -307,7 +307,20 @@ export class VipLandLogic extends Logic<Config> {
 
     // 对这块地进行收获
     harvestSeed(land: LandInfo) {
-        return false;
+        this.logger.log('对[VIP土地 %d]进行收获', land.index);
+        this.reqest({
+            type: 'farm',
+            url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
+            data: { act: 'harvest', index: land.index },
+            cd: 1,
+            callback: (data) => {
+                if (data.ecode !== 0) {
+                    return this.delay(15, this.getVipLandInfo);
+                }
+                this.delay(1, this.getVipLandInfo);
+            },
+        });
+        return true;
     }
 
     // 对这块地进行种植
