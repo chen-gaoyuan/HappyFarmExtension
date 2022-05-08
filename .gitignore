@@ -26,5 +26,3 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
-
-HappyFarmExtension.js
