@@ -35,7 +35,7 @@ export class Server {
         }
 
         watch(envFilePath, this.onFileChange.bind(this));
-        setInterval(this.checkRobotTimeout.bind(this), 60 * 1000);
+        // setInterval(this.checkRobotTimeout.bind(this), 60 * 1000);
         setInterval(this.onUpdate.bind(this), 100);
     }
 
