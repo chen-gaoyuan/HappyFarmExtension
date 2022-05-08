@@ -37,6 +37,8 @@ interface LandInfo {
 const TOOL_TIME = 1 * 60 * 60;
 
 export class VipLandLogic extends Logic<Config> {
+    // 能否上下花藤
+    canShow = true;
     // 花园等级
     lv: number = 0;
     // v币数量
@@ -155,6 +157,9 @@ export class VipLandLogic extends Logic<Config> {
         if (!this.config.auto_show) {
             return false;
         }
+        if (!this.canShow) {
+            return false;
+        }
         let minId = 0;
         let minIndex = 0;
         for (const garden of this.garden) {
@@ -209,6 +214,11 @@ export class VipLandLogic extends Logic<Config> {
                 callback: (data) => {
                     if (data.ecode !== 0) {
                         return this.delay(15, this.getVipLandInfo);
+                    }
+                    if (data.ret == -12) {
+                        this.canShow = false;
+                        this.logger.warn(data.direction);
+                        return this.delay(15, this.analyzeExecute);
                     }
                     for (const garden of this.garden) {
                         if (garden.index === minIndex) {
