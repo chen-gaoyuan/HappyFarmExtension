@@ -1,6 +1,8 @@
 import { Logic } from '../logic';
 
 interface Config {
+    // # 那几块地需要种植迷人藤 例如 只要第一块和第八块 [1, 8]
+    lands: number[];
     // # 0: 不自动使用土地药水 1: 自动使用红土地药水
     use_land_tool: number;
     // # 0: 不自动使用加速药水 1: 自动使用加速药水
@@ -108,6 +110,9 @@ export class VipLandLogic extends Logic<Config> {
         const nowTime = Math.floor(Date.now() / 1000);
         // 按土地顺序处理
         for (const land of this.land) {
+            if (!this.config.lands.includes(land.index)) {
+                continue;
+            }
             // 熟了就收获
             if (land.harvest_t && land.harvest_t < nowTime) {
                 this.harvestSeed(land);
