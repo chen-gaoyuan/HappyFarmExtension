@@ -52,7 +52,17 @@ export class Logic<T = any> {
                                     this.robot.removeSelf('session已过期 需要重新登录');
                                     return;
                                 }
-                                req.callback.call(this, obj, res.statusCode);
+                                if (obj.ecode < 0 && obj.direction) {
+                                    this.logger.warn('%s ecode: %d', obj.direction, obj.ecode);
+                                }
+                                if (obj.ecode == -10000) {
+                                    // 系统繁忙 三十秒后再处理
+                                    this.delay(30, () => {
+                                        req.callback.call(this, obj, res.statusCode);
+                                    });
+                                } else {
+                                    req.callback.call(this, obj, res.statusCode);
+                                }
                             }
                         });
                     },
