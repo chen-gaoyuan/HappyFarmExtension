@@ -365,11 +365,17 @@ export class VipLandLogic extends Logic<Config> {
                         return this.delay(15, this.getVipLandInfo);
                     }
                     this.vcoin -= sprice;
+
+                    let hasFind = false;
                     for (const seed of this.seedlist) {
                         if (seed.id == sid) {
                             seed.num++;
+                            hasFind = true;
                             break;
                         }
+                    }
+                    if (!hasFind) {
+                        this.seedlist.push({ id: sid, num: 1 });
                     }
 
                     this.analyzeExecute();
