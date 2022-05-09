@@ -317,7 +317,7 @@ export class VipLandLogic extends Logic<Config> {
             },
         });
 
-        return false;
+        return true;
     }
 
     // 对这块地进行收获
