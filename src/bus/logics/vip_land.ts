@@ -332,6 +332,7 @@ export class VipLandLogic extends Logic<Config> {
                 if (data.ecode !== 0) {
                     return this.delay(15, this.getVipLandInfo);
                 }
+                this.logger.log('在[VIP土地 %d]收获成功! 经验值 +%d', land.index, data.exp);
                 this.delay(1, this.getVipLandInfo);
             },
         });
@@ -485,6 +486,11 @@ export class VipLandLogic extends Logic<Config> {
                 if (data.ecode !== 0) {
                     return this.delay(15, this.getVipLandInfo);
                 }
+
+                if (data.s) {
+                    this.logger.log('哇塞, 运气好到爆炸! 额外获得: ' + data.s);
+                }
+
                 for (const tool of this.toollist) {
                     if (tool.id == tid) {
                         tool.num--;
