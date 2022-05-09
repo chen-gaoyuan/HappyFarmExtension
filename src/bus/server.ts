@@ -86,10 +86,14 @@ export class Server {
         // 检查机器人是否超时
         for (const [uinY, robot] of this.robots) {
             if (Date.now() - robot.getSyncTime() > 1000 * 60 * 10) {
-                this.robots.delete(uinY);
-                this.logger.warn(`[${robot.uinY}] 同步授权数据超时, 已下线!`);
+                this.removeRobot(robot, '同步授权数据超时');
             }
         }
+    }
+
+    private removeRobot(robot: Robot, reason: string) {
+        this.robots.delete(robot.uinY);
+        this.logger.error(`[${robot.uinY}] ${reason}, 已下线!`);
     }
 
     private onUpdate() {
@@ -107,8 +111,7 @@ export class Server {
                 if (config) {
                     robot.reloadConfig(this.env, config);
                 } else {
-                    this.robots.delete(uinY);
-                    this.logger.warn(`修改配置后, [${robot.uinY}] 无可用配置, 已下线!`);
+                    this.removeRobot(robot, '修改配置后 无可用配置');
                 }
             }
         }
@@ -173,7 +176,7 @@ export class Server {
             });
             this.logger.debug(`[${params['uinY']}] 同步授权数据成功!`);
         } else {
-            const newRobot = new Robot(params['uinY'], params['uIdx']);
+            const newRobot = new Robot(this, params['uinY'], params['uIdx']);
             this.robots.set(params['uinY'], newRobot);
             newRobot.syncAuthData({
                 ...params,

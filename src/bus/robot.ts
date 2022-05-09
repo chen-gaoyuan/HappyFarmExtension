@@ -26,10 +26,13 @@ export class Robot {
 
     protected callbackQueue: { time: number; callback: () => void }[] = [];
 
-    constructor(readonly uinY: string, readonly uIdx: string) {
+    constructor(readonly server: any, readonly uinY: string, readonly uIdx: string) {
         this.logger = new Logger(`${uinY}`);
     }
 
+    public removeSelf(reason: string) {
+        this.server.removeRobot(this, reason);
+    }
     public getSyncTime() {
         return this.syncTime;
     }

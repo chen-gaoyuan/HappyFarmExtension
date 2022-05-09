@@ -47,7 +47,12 @@ export class Logic<T = any> {
                             } else {
                                 this.logger.debug('recv %s <= %d %s', req.url, res.statusCode, data);
 
-                                req.callback.call(this, JSON.parse(data), res.statusCode);
+                                const obj = JSON.parse(data);
+                                if (obj.ecode == -10004) {
+                                    this.robot.removeSelf('session已过期 需要重新登录');
+                                    return;
+                                }
+                                req.callback.call(this, obj, res.statusCode);
                             }
                         });
                     },
