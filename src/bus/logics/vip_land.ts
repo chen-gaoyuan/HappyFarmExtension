@@ -3,6 +3,8 @@ import { Logic } from '../logic';
 interface Config {
     // # 那几块地需要种植迷人藤 例如 只要第一块和第八块 [1, 8]
     lands: number[];
+    // # 药水最多用几轮
+    max_turn: number;
     // # 0: 不自动使用土地药水 1: 自动使用红土地药水
     use_land_tool: number;
     // # 0: 不自动使用加速药水 1: 自动使用加速药水
@@ -141,6 +143,10 @@ export class VipLandLogic extends Logic<Config> {
             }
             //  没cd就用药水
             if (this.config.use_leaf_tool && nowTime > land.plant_t + TOOL_TIME && land.cd < nowTime) {
+                // 最大轮数控制
+                if (this.config.max_turn && land.sum_tool >= this.config.max_turn * 10) {
+                    continue;
+                }
                 const needAmount = 10 - (land.sum_tool % 10);
                 if (this.useTool(land, needAmount, 24, 200, '叶子药水')) {
                     return;
