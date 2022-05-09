@@ -440,11 +440,17 @@ export class VipLandLogic extends Logic<Config> {
                             return this.delay(15, this.getVipLandInfo);
                         }
                         this.vcoin -= buyAmount * tprice;
+                        let hasFind = false;
                         for (const tool of this.toollist) {
                             if (tool.id == tid) {
                                 tool.num += buyAmount;
+                                hasFind = true;
                                 break;
                             }
+                        }
+
+                        if (!hasFind) {
+                            this.toollist.push({ id: tid, num: buyAmount });
                         }
 
                         this.analyzeExecute();
