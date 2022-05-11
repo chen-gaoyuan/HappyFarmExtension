@@ -19,28 +19,24 @@ interface Config {
     save_amount: number;
 }
 
-interface LandInfo {
-    index: number; // 第几块地
-    id: number; // 种子id 现在只有一种种子
-    ml: number; // 魅力值
-    plant_t: number; // 播种时间 使用加速药水会使时间提前1小时
-    harvest_t: number; // 收获时间
-
-    rs: number; // 是否使用了土地药水
-    rs_t: number; // 土地药水到期时间?
-
-    cd: number; // 道具使用冷却时间
-    sum_tool: number; // 总共使用了多少次道具了
-
-    color: number; // 植物颜色
-    element: []; // 植物元素
-}
-
 const TOOL_TIME = 1 * 60 * 60;
 
 export class VipLandLogic extends Logic<Config> {
     // 能否上下花藤
     canShow = true;
+
+    // 新土地信息
+    newland: {
+        bitmap: number;
+        cropId: number;
+        cropStatus: number;
+        harvestTimes: number;
+        lanid: number;
+        level: number;
+        output: number;
+        plantTime: number;
+    }[] = [];
+
     // 花园等级
     lv: number = 0;
     // v币数量
@@ -70,27 +66,73 @@ export class VipLandLogic extends Logic<Config> {
         harvest: number; // 收获时间
     }[] = [];
     // 土地列表
-    land: LandInfo[] = [];
+    land: {
+        index: number; // 第几块地
+        id: number; // 种子id 现在只有一种种子
+        ml: number; // 魅力值
+        plant_t: number; // 播种时间 使用加速药水会使时间提前1小时
+        harvest_t: number; // 收获时间
+
+        rs: number; // 是否使用了土地药水
+        rs_t: number; // 土地药水到期时间?
+
+        cd: number; // 道具使用冷却时间
+        sum_tool: number; // 总共使用了多少次道具了
+
+        color: number; // 植物颜色
+        element: []; // 植物元素
+    }[] = [];
 
     // 启动流程
     onInit() {
         this.getVipLandInfo();
     }
-
     // 获取vip土地信息
     getVipLandInfo() {
-        this.logger.log('与服务器同步花园信息...');
+        this.logger.log('获取vip土地信息...');
         this.reqest({
             type: 'farm',
-            url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
-            data: { act: 'index' },
-            cd: 3,
+            url: 'https://nc.qzone.qq.com/cgi-bin/query?act=2033006',
+            data: {},
+            cd: 10,
             callback: this.onSyncVipLandInfo,
         });
     }
 
     // 同步vip土地信息
     onSyncVipLandInfo(data: any) {
+        if (data.ecode !== 0) {
+            return this.delay(15, this.getVipLandInfo);
+        }
+
+        this.newland = data.newland;
+
+        this.logger.log('当前vip土地数量: %d', this.newland.length);
+
+        for (const landId of this.config.lands) {
+            const newland = this.newland.find((newland) => newland.lanid === landId);
+            if (newland && newland.cropId) {
+                this.logger.error('[VIP土地 %d]已种植其他作物! 无法继续种植迷人藤!', landId);
+            }
+        }
+
+        this.getVipLandInfo2();
+    }
+
+    // 获取花园信息
+    getVipLandInfo2() {
+        this.logger.log('获取花园信息...');
+        this.reqest({
+            type: 'farm',
+            url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
+            data: { act: 'index' },
+            cd: 3,
+            callback: this.onSyncVipLandInfo2,
+        });
+    }
+
+    // 同步vip土地信息
+    onSyncVipLandInfo2(data: any) {
         if (data.ecode !== 0) {
             return this.delay(15, this.getVipLandInfo);
         }
@@ -113,31 +155,39 @@ export class VipLandLogic extends Logic<Config> {
         }
         const nowTime = Math.floor(Date.now() / 1000);
         // 按土地顺序处理
-        for (const land of this.land) {
-            if (!this.config.lands.includes(land.index)) {
+        for (const newland of this.newland) {
+            // 这块不让种
+            if (!this.config.lands.includes(newland.lanid)) {
                 continue;
             }
+            // 这块有其他作物
+            if (newland.cropId) {
+                continue;
+            }
+            const land = this.land.find((land) => land.index === newland.lanid);
+
             // 熟了就收获
-            if (land.harvest_t && land.harvest_t < nowTime) {
-                this.harvestSeed(land);
+            if (land && land.harvest_t && land.harvest_t < nowTime) {
+                this.harvestSeed(newland.lanid);
                 return;
             }
-            // 没有种植先播种
-            if (!land.id) {
-                if (this.plantSeed(land, 1, 500, '迷人藤')) {
+
+            // 这块地都没有 说明从来没种过 先种一下
+            if (!land || !land.id) {
+                if (this.plantSeed(newland.lanid, 1, 500, '迷人藤')) {
                     return;
                 }
                 continue;
             }
             // 还没有用土地药水就用土地药水
             if (this.config.use_land_tool && !land.rs) {
-                if (this.useTool(land, 1, 1, 200, '土地药水')) {
+                if (this.useTool(newland.lanid, 1, 1, 200, '土地药水')) {
                     return;
                 }
             }
             // 还不能使用道具就用加速药水
             if (this.config.use_speed_tool && nowTime < land.plant_t + TOOL_TIME) {
-                if (this.useTool(land, 1, 15, 100, '加速药水')) {
+                if (this.useTool(newland.lanid, 1, 15, 100, '加速药水')) {
                     return;
                 }
             }
@@ -148,7 +198,7 @@ export class VipLandLogic extends Logic<Config> {
                     continue;
                 }
                 const needAmount = 10 - (land.sum_tool % 10);
-                if (this.useTool(land, needAmount, 24, 200, '叶子药水')) {
+                if (this.useTool(newland.lanid, needAmount, 24, 200, '叶子药水')) {
                     return;
                 }
             }
@@ -327,26 +377,26 @@ export class VipLandLogic extends Logic<Config> {
     }
 
     // 对这块地进行收获
-    harvestSeed(land: LandInfo) {
-        this.logger.log('对[VIP土地 %d]进行收获', land.index);
+    harvestSeed(landIndex: number) {
+        this.logger.log('对[VIP土地 %d]进行收获', landIndex);
         this.reqest({
             type: 'farm',
             url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
-            data: { act: 'harvest', index: land.index },
+            data: { act: 'harvest', index: landIndex },
             cd: 1,
             callback: (data) => {
                 if (data.ecode !== 0) {
                     return this.delay(15, this.getVipLandInfo);
                 }
-                this.logger.log('在[VIP土地 %d]收获成功! 经验值 +%d', land.index, data.exp);
-                this.delay(1, this.getVipLandInfo);
+                this.logger.log('在[VIP土地 %d]收获成功! 经验值 +%d', landIndex, data.exp);
+                this.delay(1, this.getVipLandInfo2);
             },
         });
         return true;
     }
 
     // 对这块地进行种植
-    plantSeed(land: LandInfo, sid: number, sprice: number, sname: string) {
+    plantSeed(landIndx: number, sid: number, sprice: number, sname: string) {
         let seedAmount = 0;
         for (const seed of this.seedlist) {
             if (seed.id == sid) {
@@ -361,7 +411,7 @@ export class VipLandLogic extends Logic<Config> {
                 // V币不够 卖个花藤先
                 return this.saleOne();
             }
-            this.logger.log('[%s种子]不足, 使用[%d]个V币为[VIP土地 %d]购买[1]个', sname, sprice, land.index);
+            this.logger.log('[%s种子]不足, 使用[%d]个V币为[VIP土地 %d]购买[1]个', sname, sprice, landIndx);
             this.reqest({
                 type: 'farm',
                 url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
@@ -391,11 +441,11 @@ export class VipLandLogic extends Logic<Config> {
             return true;
         }
 
-        this.logger.log('在[VIP土地 %d]种植一株[%s]', land.index, sname);
+        this.logger.log('在[VIP土地 %d]种植一株[%s]', landIndx, sname);
         this.reqest({
             type: 'farm',
             url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
-            data: { act: 'plant', index: land.index, cid: sid },
+            data: { act: 'plant', index: landIndx, cid: sid },
             cd: 1,
             callback: (data) => {
                 if (data.ecode !== 0) {
@@ -415,7 +465,7 @@ export class VipLandLogic extends Logic<Config> {
         return true;
     }
 
-    useTool(land: LandInfo, amount: number, tid: number, tprice: number, tname: string) {
+    useTool(landIndx: number, amount: number, tid: number, tprice: number, tname: string) {
         let toolAmount = 0;
         for (const tool of this.toollist) {
             if (tool.id == tid) {
@@ -440,7 +490,7 @@ export class VipLandLogic extends Logic<Config> {
                     '[%s]不足, 使用[%d]个V币为[VIP土地 %d]购买[%d]个',
                     tname,
                     tprice * buyAmount,
-                    land.index,
+                    landIndx,
                     buyAmount,
                 );
                 this.reqest({
@@ -481,12 +531,12 @@ export class VipLandLogic extends Logic<Config> {
             }
         }
 
-        this.logger.log('在[VIP土地 %d]使用一个[%s]', land.index, tname);
+        this.logger.log('在[VIP土地 %d]使用一个[%s]', landIndx, tname);
 
         this.reqest({
             type: 'farm',
             url: 'https://nc.qzone.qq.com/cgi-bin/cgi_vip_land',
-            data: { act: 'rs', index: land.index, tid: tid },
+            data: { act: 'rs', index: landIndx, tid: tid },
             cd: 1,
             callback: (data) => {
                 if (data.ecode !== 0) {
