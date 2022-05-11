@@ -116,7 +116,7 @@ export class VipLandLogic extends Logic<Config> {
             }
         }
 
-        this.getVipLandInfo2();
+        this.delay(2, this.getVipLandInfo2);
     }
 
     // 获取花园信息
