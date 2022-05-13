@@ -198,7 +198,7 @@ export class VipLandLogic extends Logic<Config> {
                     continue;
                 }
                 const needAmount = 10 - (land.sum_tool % 10);
-                if (this.useTool(newland.lanid, needAmount, 24, 200, '叶子药水')) {
+                if (this.useTool(newland.lanid, needAmount, 24, 200, '叶子药水', land.sum_tool + 1)) {
                     return;
                 }
             }
@@ -465,7 +465,7 @@ export class VipLandLogic extends Logic<Config> {
         return true;
     }
 
-    useTool(landIndx: number, amount: number, tid: number, tprice: number, tname: string) {
+    useTool(landIndx: number, amount: number, tid: number, tprice: number, tname: string, curCount: number = 0) {
         let toolAmount = 0;
         for (const tool of this.toollist) {
             if (tool.id == tid) {
@@ -531,7 +531,11 @@ export class VipLandLogic extends Logic<Config> {
             }
         }
 
-        this.logger.log('在[VIP土地 %d]使用一个[%s]', landIndx, tname);
+        if (curCount) {
+            this.logger.log('在[VIP土地 %d]使用一个[%s]', landIndx, tname);
+        } else {
+            this.logger.log('在[VIP土地 %d]第[%d]次使用一个[%s]', landIndx, curCount, tname);
+        }
 
         this.reqest({
             type: 'farm',
