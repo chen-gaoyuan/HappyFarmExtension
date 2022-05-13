@@ -531,7 +531,7 @@ export class VipLandLogic extends Logic<Config> {
             }
         }
 
-        if (curCount) {
+        if (!curCount) {
             this.logger.log('在[VIP土地 %d]使用一个[%s]', landIndx, tname);
         } else {
             this.logger.log('在[VIP土地 %d]第[%d]次使用一个[%s]', landIndx, curCount, tname);
