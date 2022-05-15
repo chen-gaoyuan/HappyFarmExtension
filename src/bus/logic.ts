@@ -3,7 +3,7 @@ import { Logger } from 'src/log';
 import { Robot } from './robot';
 
 export class Logic<T = any> {
-    constructor(readonly logger: Logger, readonly robot: Robot, readonly config: T) {}
+    constructor(readonly logger: Logger, readonly robot: Robot, readonly rule: T) {}
 
     onInit() {}
 

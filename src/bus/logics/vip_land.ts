@@ -109,7 +109,7 @@ export class VipLandLogic extends Logic<Config> {
 
         this.logger.log('当前vip土地数量: %d', this.newland.length);
 
-        for (const landId of this.config.lands) {
+        for (const landId of this.rule.lands) {
             const newland = this.newland.find((newland) => newland.lanid === landId);
             if (newland && newland.cropId) {
                 this.logger.error('[VIP土地 %d]已种植其他作物! 无法继续种植迷人藤!', landId);
@@ -157,7 +157,7 @@ export class VipLandLogic extends Logic<Config> {
         // 按土地顺序处理
         for (const newland of this.newland) {
             // 这块不让种
-            if (!this.config.lands.includes(newland.lanid)) {
+            if (!this.rule.lands.includes(newland.lanid)) {
                 continue;
             }
             // 这块有其他作物
@@ -180,21 +180,21 @@ export class VipLandLogic extends Logic<Config> {
                 continue;
             }
             // 还没有用土地药水就用土地药水
-            if (this.config.use_land_tool && !land.rs) {
+            if (this.rule.use_land_tool && !land.rs) {
                 if (this.useTool(newland.lanid, 1, 1, 200, '土地药水')) {
                     return;
                 }
             }
             // 还不能使用道具就用加速药水
-            if (this.config.use_speed_tool && nowTime < land.plant_t + TOOL_TIME) {
+            if (this.rule.use_speed_tool && nowTime < land.plant_t + TOOL_TIME) {
                 if (this.useTool(newland.lanid, 1, 15, 100, '加速药水')) {
                     return;
                 }
             }
             //  没cd就用药水
-            if (this.config.use_leaf_tool && nowTime > land.plant_t + TOOL_TIME && land.cd < nowTime) {
+            if (this.rule.use_leaf_tool && nowTime > land.plant_t + TOOL_TIME && land.cd < nowTime) {
                 // 最大轮数控制
-                if (this.config.max_turn && land.sum_tool >= this.config.max_turn * 10) {
+                if (this.rule.max_turn && land.sum_tool >= this.rule.max_turn * 10) {
                     continue;
                 }
                 const needAmount = 10 - (land.sum_tool % 10);
@@ -210,7 +210,7 @@ export class VipLandLogic extends Logic<Config> {
 
     // 自动展示
     autoShow() {
-        if (!this.config.auto_show) {
+        if (!this.rule.auto_show) {
             return false;
         }
         if (!this.canShow) {
@@ -322,7 +322,7 @@ export class VipLandLogic extends Logic<Config> {
 
     // 卖掉魅力值最小的那个花藤
     saleOne() {
-        if (!this.config.auto_sale) {
+        if (!this.rule.auto_sale) {
             return false;
         }
         // 判断是否够卖
@@ -333,7 +333,7 @@ export class VipLandLogic extends Logic<Config> {
             }
             totalAmount += 1;
         }
-        if (totalAmount <= this.config.save_amount) {
+        if (totalAmount <= this.rule.save_amount) {
             return false;
         }
         // 卖掉魅力值最小的那个花藤
