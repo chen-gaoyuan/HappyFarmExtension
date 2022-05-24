@@ -120,9 +120,7 @@ export class Robot {
         this.operationQueue.length = 0;
         this.callbackQueue.length = 0;
 
-        if (config.VIP_LAND.enable) {
-            this.logics.add(new VipLandLogic(this.logger, this, config.VIP_LAND));
-        }
+        this.logics.add(new VipLandLogic(this.logger, this, config.VIP_LAND || {}));
 
         for (const logic of this.logics) {
             try {

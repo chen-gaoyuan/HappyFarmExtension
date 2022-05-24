@@ -41,8 +41,8 @@ export class Server {
     }
 
     private readConfigFile() {
-        // 三十分钟后再读取配置文件
-        this.leftReloadTime = 30 * 60;
+        // 四个小时后再读取配置文件
+        this.leftReloadTime = 4 * 60 * 60;
 
         this.logger.log(`重新加载配置文件...`);
 
