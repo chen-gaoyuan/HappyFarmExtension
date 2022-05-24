@@ -9,17 +9,27 @@ export class Logic<T = any> {
 
     protected reqest(req: {
         type: 'farm';
+        name: string;
         url: string;
-        data: { [key: string]: number | string };
+        query: { [key: string]: string };
+        data: { [key: string]: string };
         cd?: number;
         callback: (data: any, statusCode: number) => void;
     }) {
+        const parmas = Object.keys(req.query)
+            .map((key) => `${key}=${req.query[key]}`)
+            .join('&');
+        let reqUrl = req.url;
+        if (parmas.length > 0) {
+            reqUrl += '?' + parmas;
+        }
         const reqCoolDownTime = 0.5;
         this.robot.addOperation('request', reqCoolDownTime, () => {
             const opCoolDownTime = req.cd || 0;
             this.robot.addOperation(req.url, opCoolDownTime, () => {
+                this.logger.log(req.name);
                 const reqObj = request(
-                    req.url,
+                    reqUrl,
                     {
                         method: 'POST',
                         headers: {
@@ -41,11 +51,11 @@ export class Logic<T = any> {
                             }
                             data = data.trim();
                             if (res.statusCode != 200 || data == '') {
-                                this.logger.error('recv %s <= %d %s', req.url, res.statusCode, data);
+                                this.logger.error('recv %s <= %d %s', reqUrl, res.statusCode, data);
 
                                 req.callback.call(this, {}, res.statusCode);
                             } else {
-                                this.logger.debug('recv %s <= %d %s', req.url, res.statusCode, data);
+                                this.logger.debug('recv %s <= %d %s', reqUrl, res.statusCode, data);
 
                                 const obj = JSON.parse(data);
                                 if (obj.ecode == -10004) {
@@ -84,7 +94,7 @@ export class Logic<T = any> {
                 reqObj.write(bodyStr);
                 reqObj.end();
 
-                this.logger.debug('send %s => %s', req.url, bodyStr);
+                this.logger.debug('send %s => %s', reqUrl, bodyStr);
             });
         });
     }

@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { Logger } from '../log';
 import { Logic } from './logic';
-import { VipLandLogic } from './logics/vip_land';
+import { RuleLogic as VipLandLogic } from './logics/vip_land/Logic';
 
 export class Robot {
     protected env: any;
