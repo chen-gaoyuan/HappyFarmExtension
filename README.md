@@ -24,3 +24,11 @@
 手动先执行一次将授权数据同步至服务端,
 观察日志打印内容是否正常,
 如果有异常情况可以加群反馈.
+
+## 编译运行
+
+安装 nodejs
+执行命令 npm install -g yrm
+执行命令 yrm use taobao
+执行命令 npm install -g yarn
+项目目录下执行命令 yarn
