@@ -4,6 +4,8 @@ import { Logic } from '../../logic';
 export class RuleLogic extends Logic<Rule> {
     logicName: string = Name;
 
+    inited = false;
+
     // 能否上下花藤
     canShow = true;
 
@@ -67,6 +69,7 @@ export class RuleLogic extends Logic<Rule> {
 
     // 启动流程
     onInit() {
+        this.inited = false;
         if (this.rule.enable) {
             this.getVipLandInfo();
         }
@@ -132,6 +135,7 @@ export class RuleLogic extends Logic<Rule> {
         this.replist = data.replist;
         this.land = data.land;
 
+        this.inited = true;
         this.analyzeExecute();
     }
 
@@ -225,7 +229,7 @@ export class RuleLogic extends Logic<Rule> {
             }
             // 还没有用土地药水就用土地药水
             if (this.rule.use_land_tool && !land.rs) {
-                if (this.useTool(newland.lanid, 1, 1, 200, '土地药水')) {
+                if (this.useTool(newland.lanid, 1, this.rule.land_tool_id, 200, '土地药水')) {
                     return;
                 }
             }
@@ -243,7 +247,9 @@ export class RuleLogic extends Logic<Rule> {
                     continue;
                 }
                 const needAmount = 10 - (land.sum_tool % 10);
-                if (this.useTool(newland.lanid, needAmount, 24, 200, '叶子药水', land.sum_tool + 1)) {
+                if (
+                    this.useTool(newland.lanid, needAmount, this.rule.leaf_tool_id, 200, '叶子药水', land.sum_tool + 1)
+                ) {
                     return;
                 }
             }

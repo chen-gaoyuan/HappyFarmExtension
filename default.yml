@@ -13,10 +13,14 @@ VIP_LAND:
     max_count: 0
     # 0: 不自动使用土地药水 1: 自动使用红土地药水
     use_land_tool: 1
+    # 土地药水id
+    land_tool_id: 1
     # 0: 不自动使用加速药水 1: 自动使用加速药水
     use_speed_tool: 1
     # 0: 不自动使用叶子药水 1: 自动使用掌状复叶药水
     use_leaf_tool: 1
+    # 叶子药水id
+    leaf_tool_id: 24
     # 0: 不自动展示最高魅力值的花藤 1: 自动展示最高魅力值的花藤
     auto_show: 0
     # 0: 不自动出售花藤 1: 自动出售花藤
